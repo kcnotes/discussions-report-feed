@@ -1,8 +1,14 @@
 'using strict';
 const irc       = require("irc-upd");
+const Discord   = require('discord.js');
 const config    = require('./config.json');
 const feeds     = require('./feeds.json');
+const commands  = require('./commands.js');
 
+const client = new Discord.Client();
+client.login(config.botToken);
+
+// IRC
 let ircClient = new irc.Client(
         config.irc.host,
         config.irc.nickname, {
@@ -23,6 +29,11 @@ let ircClient = new irc.Client(
  */
 let wikiMap = {},
 	wikis = null;
+
+function generateHelpCommand(cmd) {
+    const params = config.commands[cmd].params.map(p => `<${p}>`);
+    return `\`${prefix}${cmd}${params.length > 0 ? ' ' : ''}${params.join(' ')}\` : ${config.commands[cmd].description}`;
+}
 
 function regenerateWikiMap() {
     for (let entry of Object.entries(feeds)) {
@@ -55,5 +66,35 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
         }
     } catch (e) {
         console.log(e);
+    }
+});
+
+// Discord
+client.once('ready', () => {
+    console.log(`Logged in to Discord.`);
+});
+
+const actions  = Object.keys(config.commands),
+      prefix   = config.commandPrefix;
+
+client.on('message', message => {
+    let content = message.content.trim();
+    if (content.startsWith(prefix)) {
+        if (config.allowedConfigChannels.indexOf(message.channel.id) >= 0) {
+            for (const action of actions) {
+                if (content.startsWith(prefix + action)) {
+                    try {
+                        let params = content.split(' ').filter(el => el != null && el != '');
+                        commands[action](message, params);
+                    } catch (e) {
+                        console.log(e);
+                        message.channel.send(`Usage: ${generateHelpCommand(action)}`);
+                    }
+                    return;
+                }
+            }
+            // If we get here, no found command
+            message.channel.send(`Discussions report feed: command not found. See ${prefix}help`);
+        }
     }
 });
