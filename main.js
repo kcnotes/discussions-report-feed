@@ -28,7 +28,8 @@ let ircClient = new irc.Client(
  * @type {Object}
  */
 let wikiMap = {},
-	wikis = null;
+	wikis = null,
+    formatMap = {};
 
 function generateHelpCommand(cmd) {
     const params = config.commands[cmd].params.map(p => `<${p}>`);
@@ -37,6 +38,7 @@ function generateHelpCommand(cmd) {
 
 function regenerateWikiMap() {
     wikiMap = {};
+    formatMap = {};
     for (let entry of Object.entries(feeds)) {
         if (('archived' in entry[1].config) && (entry[1].config.archived)) {
             continue;
@@ -52,10 +54,14 @@ function regenerateWikiMap() {
     		} else {
     			wikiMap[wiki] = new Set([...webhooks, ...channels]);
     		}
+            for (const endpoint of [...webhooks, ...channels]) {
+                if (endpoint in formatMap) continue;
+                formatMap[endpoint] = entry[1].config;
+            }
     	}
     }
     wikis = new Set(Object.keys(wikiMap));
-    console.log(wikiMap, wikis);
+    console.log(wikiMap, wikis, formatMap);
 }
 
 regenerateWikiMap();
@@ -67,7 +73,37 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
         	wiki = post.url.replace('https://', '').split('/f/')[0],
         	type = post.type;
         if (type === 'discussion-report' && wikis.has(wiki)) {
-            console.log(wikiMap[wiki]);
+            for (const endpoint of Array.from(wikiMap[wiki])) {
+                // Get lines to send
+                let embed1 = formatMap[endpoint].showWikiInFeed ? `[${wiki}](https://${wiki}/f/reported): ` : '';
+                embed1 += `[New reported post (reported by ${post.userName})](${post.url})`;
+                let line1 = formatMap[endpoint].showWikiInFeed ? `${wiki}: ` : '';
+                line1 += `Report by ${post.userName}: <${post.url}>`;
+                let line2 = post.snippet;
+
+                if (formatMap[endpoint].displayEmbed) {
+                    const embed = new Discord.MessageEmbed()
+                        .setDescription(embed1 + '\n' + line2)
+                        .setColor('#FF285C');
+                    if (endpoint.startsWith('https://')) {
+                        let parts = endpoint.split('/');
+                        const webhookClient = new Discord.WebhookClient(parts[5], parts[6]);
+                        webhookClient.send(null, {
+                            embeds: [embed]
+                        });
+                    } else {
+                        client.channels.cache.get(endpoint).send({embed: embed});
+                    }
+                } else {
+                    if (endpoint.startsWith('https://')) {
+                        let parts = endpoint.split('/');
+                        const webhookClient = new Discord.WebhookClient(parts[5], parts[6]);
+                        webhookClient.send(line1 + ' | ' + line2);
+                    } else {
+                        client.channels.cache.get(endpoint).send(line1 + ' | ' + line2);
+                    }
+                }
+            }
         }
     } catch (e) {
         console.log(e);
