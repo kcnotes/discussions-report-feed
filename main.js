@@ -36,7 +36,11 @@ function generateHelpCommand(cmd) {
 }
 
 function regenerateWikiMap() {
+    wikiMap = {};
     for (let entry of Object.entries(feeds)) {
+        if (('archived' in entry[1].config) && (entry[1].config.archived)) {
+            continue;
+        }
     	let tag = entry[0];
     	let wikis = entry[1].wikis;
     	let webhooks = entry[1].webhooks || [];
@@ -51,6 +55,7 @@ function regenerateWikiMap() {
     	}
     }
     wikis = new Set(Object.keys(wikiMap));
+    console.log(wikiMap, wikis);
 }
 
 regenerateWikiMap();
@@ -82,14 +87,16 @@ client.on('message', message => {
     if (content.startsWith(prefix)) {
         if (config.allowedConfigChannels.indexOf(message.channel.id) >= 0) {
             for (const action of actions) {
-                if (content.startsWith(prefix + action)) {
+                let command = content.split(' ')[0];
+                if (command === prefix + action) {
                     try {
                         let params = content.split(' ').filter(el => el != null && el != '');
                         commands[action](message, params);
                     } catch (e) {
                         console.log(e);
-                        message.channel.send(`Usage: ${generateHelpCommand(action)}`);
+                        message.channel.send(`A general error occurred. Please contact Noreplyz.\nUsage: ${generateHelpCommand(action)}`);
                     }
+                    regenerateWikiMap();
                     return;
                 }
             }

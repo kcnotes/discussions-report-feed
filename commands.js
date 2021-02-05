@@ -109,6 +109,14 @@ function cleanWiki(url) {
     return url;
 }
 
+function stringToBoolean(string){
+    switch(string.toLowerCase().trim()){
+        case "true": case "yes": case "1": return true;
+        case "false": case "no": case "0": case null: return false;
+        default: return Boolean(string);
+    }
+}
+
 commands.create = function(message, params) {
     if (!checkParamCount(message, params, 'create', 1, null)) return;
     let cmd, feed, description;
@@ -122,6 +130,7 @@ commands.create = function(message, params) {
         feeds[feed] = {
             "wikis": [],
             "channels": [],
+            "webhooks": [],
             "config": {
                 "info": description
             }
@@ -160,44 +169,185 @@ commands['add-wiki'] = function(message, params) {
     let cmd, feed, wiki;
     [cmd, feed, wiki] = params;
     wiki = cleanWiki(wiki);
-    console.log(wiki);
-    // if (feed in feeds) {
-    //     message.channel.send(`Feed '${feed}': ${feeds[feed].config.info}`);
-    // } else {
-    //     message.channel.send(`Feed not found.`);
-    // }
-};
-
-commands['add-list'] = function(message, params) {
-
+    if (feed in feeds) {
+        if (!wiki.match(/\.(fandom|gamepedia|wikia)\.(com|org|io)/i)) {
+            wiki = wiki + '.fandom.com';
+        }
+        if (feeds[feed].wikis.includes(wiki)) {
+            message.channel.send(`The wiki ${wiki} is already part of this feed.`);
+        } else {
+            feeds[feed].wikis.push(wiki);
+            saveFeeds();
+            message.channel.send(`Wiki ${wiki} added to the feed.`);
+        }
+    } else {
+        message.channel.send(`Feed not found or wiki is not provided as a link (e.g. community.fandom.com).`);
+    }
 };
 
 commands['remove-wiki'] = function(message, params) {
+    if (!checkParamCount(message, params, 'remove-wiki', 2, 2)) return;
+    let cmd, feed, wiki;
+    [cmd, feed, wiki] = params;
+    wiki = cleanWiki(wiki);
+    if (feed in feeds) {
+        if (!wiki.match(/\.(fandom|gamepedia|wikia)\.(com|org|io)/i)) {
+            wiki = wiki + '.fandom.com';
+        }
+        if (feeds[feed].wikis.includes(wiki)) {
+            var index = feeds[feed].wikis.indexOf(wiki);
+            if (index !== -1) {
+                feeds[feed].wikis.splice(index, 1);
+            }
+            saveFeeds();
+            message.channel.send(`Wiki ${wiki} removed from the feed.`);
+        } else {
+            message.channel.send(`The wiki ${wiki} is not part of this feed.`);
+        }
+    } else {
+        message.channel.send(`Feed not found or wiki is not provided as a link (e.g. community.fandom.com).`);
+    }
+};
 
+commands['list-wikis'] = function(message, params) {
+    if (!checkParamCount(message, params, 'list-wikis', 1, 1)) return;
+    let cmd, feed;
+    [cmd, feed] = params;
+    if (feed in feeds) {
+        if (feeds[feed].wikis.length === 0) {
+            message.channel.send(`No wikis are linked to this feed. Add some by using \`df!add-wiki ${feed} <url>\`!`);
+        } else {
+            let out = `The following wikis are part of this feed:\n- `;
+            out += feeds[feed].wikis.join('\n- ');
+            message.channel.send(out);
+        }
+    } else {
+        message.channel.send(`Feed not found.`);
+    }
 };
 
 commands['add-channel'] = function(message, params) {
-
+    if (!checkParamCount(message, params, 'add-channel', 2, 2)) return;
+    let cmd, feed, channel;
+    [cmd, feed, channel] = params;
+    if (!/^-?\d{18}$/g.test(channel)) {
+        message.channel.send(`The channel ID provided is not valid.`);
+        return;
+    }
+    if (feed in feeds) {
+        if (feeds[feed].channels.includes(channel)) {
+            message.channel.send(`The channel ${channel} is already part of this feed.`);
+        } else {
+            feeds[feed].channels.push(channel);
+            saveFeeds();
+            message.channel.send(`The channel was added to the feed.`);
+        }
+    } else {
+        message.channel.send(`Feed not found.`);
+    }
 };
 
 commands['remove-channel'] = function(message, params) {
-
+    if (!checkParamCount(message, params, 'remove-channel', 2, 2)) return;
+    let cmd, feed, channel;
+    [cmd, feed, channel] = params;
+    if (!/^-?\d{18}$/g.test(channel)) {
+        message.channel.send(`The channel ID provided is not valid.`);
+        return;
+    }
+    if (feed in feeds) {
+        if (feeds[feed].channels.includes(channel)) {
+            var index = feeds[feed].channels.indexOf(channel);
+            if (index !== -1) {
+                feeds[feed].channels.splice(index, 1);
+            }
+            saveFeeds();
+            message.channel.send(`The channel was removed from the feed.`);
+        } else {
+            message.channel.send(`The channel is not part of this feed.`);
+        }
+    } else {
+        message.channel.send(`Feed not found.`);
+    }
 };
 
 commands['add-webhook'] = function(message, params) {
-
+    if (!checkParamCount(message, params, 'add-webhook', 2, 2)) return;
+    let cmd, feed, webhook;
+    [cmd, feed, webhook] = params;
+    if (!/^https:\/\/discord/g.test(webhook) || !/\/\d{18}\/[\w\d_]{68}$/g.test(webhook)) {
+        message.channel.send(`The webhook link provided is not valid.`);
+        return;
+    }
+    if (feed in feeds) {
+        if (feeds[feed].webhooks.includes(webhook)) {
+            message.channel.send(`The webhook is already part of this feed.`);
+        } else {
+            feeds[feed].webhooks.push(webhook);
+            saveFeeds();
+            message.channel.send(`The webhook was added to the feed.`);
+        }
+    } else {
+        message.channel.send(`Feed not found.`);
+    }
 };
 
 commands['remove-webhook'] = function(message, params) {
-
+    if (!checkParamCount(message, params, 'remove-webhook', 2, 2)) return;
+    let cmd, feed, webhook;
+    [cmd, feed, webhook] = params;
+    if (!/^https:\/\/discord/g.test(webhook) || !/\/\d{18}\/[\w\d_]{68}$/g.test(webhook)) {
+        message.channel.send(`The webhook link provided is not valid.`);
+        return;
+    }
+    if (feed in feeds) {
+        if (feeds[feed].webhooks.includes(webhook)) {
+            var index = feeds[feed].webhooks.indexOf(webhook);
+            if (index !== -1) {
+                feeds[feed].webhooks.splice(index, 1);
+            }
+            saveFeeds();
+            message.channel.send(`The webhook was removed from the feed.`);
+        } else {
+            message.channel.send(`The webhook is not part of this feed.`);
+        }
+    } else {
+        message.channel.send(`Feed not found.`);
+    }
 };
 
 commands.config = function(message, params) {
-
+    if (!checkParamCount(message, params, 'config', 2, null)) return;
+    let cmd, feed, key, value;
+    [cmd, feed, key, ...value] = params;
+    value = value.join(' ');
+    if (!(key in config.defaultConfig)) {
+        message.channel.send(`The key is not valid and must be one of: ${Object.keys(config.defaultConfig).join(', ')}.`);
+        return;
+    }
+    if (feed in feeds) {
+        if (!value) {
+            value = (key in feeds[feed].config) ? feeds[feed].config[key] : config.defaultConfig[key];
+            message.channel.send(`${key}: ${value.toString()}`);
+            return;
+        }
+        if (config.configDescriptions[key].type === 'boolean') {
+            value = stringToBoolean(value);
+        }
+        feeds[feed].config[key] = value;
+        saveFeeds();
+        message.channel.send(`The config value was set. ${key}: ${value.toString()}`);        
+    } else {
+        message.channel.send(`Feed not found.`);
+    }
 };
 
 commands['config-list'] = function(message, params) {
-
+    let out = config.about + '\n';
+    for (const cnf of Object.entries(config.configDescriptions)) {
+        out += `- ${cnf[0]} [${cnf[1].type}]: ${cnf[1].description}\n`;
+    }
+    message.channel.send(out);
 };
 
 commands.help = function(message, params) {
