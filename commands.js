@@ -275,7 +275,7 @@ commands['add-webhook'] = function(message, params) {
     if (!checkParamCount(message, params, 'add-webhook', 2, 2)) return;
     let cmd, feed, webhook;
     [cmd, feed, webhook] = params;
-    if (!/^https:\/\/discord/g.test(webhook) || !/\/\d{18}\/[\w\d_]{68}$/g.test(webhook)) {
+    if (!/^https:\/\/discord/g.test(webhook) || !/\/\d{18}\/.{68}$/g.test(webhook)) {
         message.channel.send(`The webhook link provided is not valid.`);
         return;
     }
