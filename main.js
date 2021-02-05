@@ -75,26 +75,30 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
         if (type === 'discussion-report' && wikis.has(wiki)) {
             for (const endpoint of Array.from(wikiMap[wiki])) {
                 // Get lines to send
-                let embed1 = formatMap[endpoint].showWikiInFeed ? `[${wiki}](https://${wiki}/f/reported): ` : '';
+                let embed1 = formatMap[endpoint].showWikiInFeed ? `[${wiki}](https://${wiki}/f/reported)\n` : '';
                 embed1 += `[New reported post (reported by ${post.userName})](${post.url})`;
                 let line1 = formatMap[endpoint].showWikiInFeed ? `${wiki}: ` : '';
                 line1 += `Report by ${post.userName}: <${post.url}>`;
                 let line2 = post.snippet;
 
                 if (formatMap[endpoint].displayEmbed) {
+                    // Display an embed
                     const embed = new Discord.MessageEmbed()
                         .setDescription(embed1 + '\n' + line2)
                         .setColor('#FF285C');
                     if (endpoint.startsWith('https://')) {
+                        // Embed via webhook
                         let parts = endpoint.split('/');
                         const webhookClient = new Discord.WebhookClient(parts[5], parts[6]);
                         webhookClient.send(null, {
                             embeds: [embed]
                         });
                     } else {
+                        // Embed via bot
                         client.channels.cache.get(endpoint).send({embed: embed});
                     }
                 } else {
+                    // Display text only
                     if (endpoint.startsWith('https://')) {
                         let parts = endpoint.split('/');
                         const webhookClient = new Discord.WebhookClient(parts[5], parts[6]);
