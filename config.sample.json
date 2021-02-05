@@ -1,0 +1,77 @@
+{
+	"about": "Discussions Report Feed!",
+	"irc": {
+		"host": "",
+		"port": "",
+		"realname": "Discussions Report Feed | Noreplyz",
+		"nickname": "DiscussionsReportFeed",
+		"channels": {
+			"discussions": "#channel"
+		}
+	},
+	"botToken": "",
+	"commands": {
+		"create": {
+			"description": "Create a new feed with the name <feed>. Provide a brief description using <info>.",
+			"params": ["feed"]
+		},
+		"archive": {
+			"description": "Stops a feed with the name <feed>.",
+			"params": ["feed"]
+		},
+		"info": {
+			"description": "Shows a brief description of the feed <feed>.",
+			"params": ["feed"]
+		},
+		"add-wiki": {
+			"description": "Adds <wiki> to the feed <feed>.",
+			"params": ["feed", "wiki"]
+		},
+		"add-list": {
+			"description": "Adds a list of <wikis> to the feed <feed>. Separate each one with a new line.",
+			"params": ["feed", "wikis"]
+		},
+		"remove-wiki": {
+			"description": "Removes <wiki> from the feed <feed>.",
+			"params": ["feed", "wiki"]
+		},
+		"add-channel": {
+			"description": "Adds a channel to the feed <feed>. Use the channel ID in <channel>.",
+			"params": ["feed", "channel"]
+		},
+		"remove-channel": {
+			"description": "Removes a channel from the feed <feed>. Use the channel ID in <channel>.",
+			"params": ["feed", "channel"]
+		},
+		"add-webhook": {
+			"description": "Adds a webhook to the feed <feed>. Use the webhook URL in <webhook>.",
+			"params": ["feed", "webhook"]
+		},
+		"remove-webhook": {
+			"description": "Removes a webhook from the feed <feed>. Use the webhook URL in <webhook>.",
+			"params": ["feed", "webhook"]
+		},
+		"config": {
+			"description": "Shows/modifies configuration value <config> for the feed <feed>.",
+			"params": ["feed", "key", "value"]
+		},
+		"config-list": {
+			"description": "Shows a list of configurable values.",
+			"params": []
+		},
+		"help": {
+			"description": "Shows all commands.",
+			"params": []
+		}
+	},
+	"allowedConfigChannels": [
+		"123"
+	],
+	"commandPrefix": "df!",
+	"defaultConfig": {
+		"info": "No description was provided.",
+		"showWikiInFeed": true,
+		"displayCondensed": false,
+		"useWebhooks": false
+	}
+}

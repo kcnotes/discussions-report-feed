@@ -1,0 +1,16 @@
+{
+	"test": {
+		"wikis": [
+			"test.fandom.com"
+		],
+		"channels": [
+			"123"
+		],
+		"webhooks": [
+			"webhook_url"
+		],
+		"config": {
+			"info": "Test feed"
+		}
+	}
+}

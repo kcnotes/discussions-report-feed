@@ -1,0 +1,12 @@
+{
+  "name": "discussions-report-feed",
+  "version": "1.0.0",
+  "description": "Discord bot feed for Discussions reports on Fandom",
+  "main": "main.js",
+  "author": "Noreplyz",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "irc-upd": "^0.11.0"
+  }
+}
