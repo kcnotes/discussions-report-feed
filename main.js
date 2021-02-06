@@ -61,7 +61,6 @@ function regenerateWikiMap() {
     	}
     }
     wikis = new Set(Object.keys(wikiMap));
-    console.log(wikiMap, wikis, formatMap);
 }
 
 regenerateWikiMap();
