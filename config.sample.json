@@ -15,6 +15,10 @@
 			"description": "Create a new feed with the name <feed>. Provide a brief description using <info>.",
 			"params": ["feed"]
 		},
+		"list-feeds": {
+			"description": "Lists the current feeds on the bot.",
+			"params": []
+		},
 		"archive": {
 			"description": "Stops a feed with the name <feed>.",
 			"params": ["feed"]

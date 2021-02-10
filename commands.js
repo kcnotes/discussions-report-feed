@@ -162,7 +162,7 @@ commands['list-feeds'] = function(message, params) {
         return;
     }
 
-    for (feed of feeds) {
+    for (const feed of Object.keys(feeds)) {
         resp += feedToString(feed) + '\n';
     } 
     message.channel.send(resp);
