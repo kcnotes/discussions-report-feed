@@ -79,8 +79,9 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
                 let line1 = formatMap[endpoint].showWikiInFeed ? `${wiki}: ` : '';
                 line1 += `Report by ${post.userName}: <${post.url}>`;
                 let line2 = post.snippet;
+                console.log(embed1);
 
-                if (formatMap[endpoint].displayEmbed) {
+                if (('displayEmbed' in formatMap[endpoint] && formatMap[endpoint].displayEmbed) || config.defaultConfig.displayEmbed) {
                     // Display an embed
                     const embed = new Discord.MessageEmbed()
                         .setDescription(embed1 + '\n' + line2)
@@ -94,7 +95,11 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
                         });
                     } else {
                         // Embed via bot
-                        client.channels.cache.get(endpoint).send({embed: embed});
+                        client.channels.cache.get(endpoint).send({
+                            embed: embed
+                        }).then(function (msg) {
+                            msg.react("❌");
+                        });
                     }
                 } else {
                     // Display text only
@@ -103,7 +108,10 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
                         const webhookClient = new Discord.WebhookClient(parts[5], parts[6]);
                         webhookClient.send(line1 + ' | ' + line2);
                     } else {
-                        client.channels.cache.get(endpoint).send(line1 + ' | ' + line2);
+                        client.channels.cache.get(endpoint).send(line1 + ' | ' + line2)
+                        .then(function(msg) {
+                            msg.react("❌");
+                        });
                     }
                 }
             }
@@ -141,6 +149,26 @@ client.on('message', message => {
             }
             // If we get here, no found command
             message.channel.send(`Discussions report feed: command not found. See ${prefix}help`);
+        }
+    }
+});
+
+/* issues#1 Allow cross reaction to delete the message */
+
+client.on("messageReactionAdd", async (MessageReaction, user) => {
+    if (MessageReaction.partial) {
+        try {
+            await MessageReaction.fetch();
+        } catch (error) {
+            return;
+        }
+    }
+    let message = MessageReaction.message,
+    emoji = MessageReaction.emoji;
+    
+    if (config.allowedGuildIdReactions.includes(message.guild.id) && user.id != config.botUserId) {
+        if (emoji.name === "❌") {
+            message.delete().catch(function() {});
         }
     }
 });
