@@ -149,8 +149,8 @@ function feedToString(feed) {
     if (!info) info = config.defaultConfig.info;
     
     const strWikis = `${nWikis} wiki${nWikis === 1 ? '' : 's'}`,
-          strChannels = `${nChannels} webhook${nChannels === 1 ? '' : 's'}`,
-          strWebhooks = `${nWebhooks} channel${nWebhooks === 1 ? '' : 's'}`;
+          strChannels = `${nChannels} channel${nChannels === 1 ? '' : 's'}`,
+          strWebhooks = `${nWebhooks} webhook${nWebhooks === 1 ? '' : 's'}`;
           
     return `**${feed}** | ${strWikis}, ${strChannels}, ${strWebhooks} | ${info}`;
 }
