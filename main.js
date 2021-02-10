@@ -79,7 +79,6 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
                 let line1 = formatMap[endpoint].showWikiInFeed ? `${wiki}: ` : '';
                 line1 += `Report by ${post.userName}: <${post.url}>`;
                 let line2 = post.snippet;
-                console.log(embed1);
 
                 if (('displayEmbed' in formatMap[endpoint] && formatMap[endpoint].displayEmbed) || config.defaultConfig.displayEmbed) {
                     // Display an embed
