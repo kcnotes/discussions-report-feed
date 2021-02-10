@@ -152,11 +152,11 @@ function feedToString(feed) {
           strChannels = `${nChannels} webhook${nChannels === 1 ? '' : 's'}`,
           strWebhooks = `${nWebhooks} channel${nWebhooks === 1 ? '' : 's'}`;
           
-    return `Feed '${feed}' (${strWikis}, ${strChannels}, ${strWebhooks})\n- description: ${info}`;
+    return `**${feed}** | ${strWikis}, ${strChannels}, ${strWebhooks} | ${info}`;
 }
 
 commands['list-feeds'] = function(message, params) {
-    let resp = `${feeds.length} feed${feeds.length === 1 ? '' : 's'} running!\n`;
+    let resp = `${Object.keys(feeds).length} feed${Object.keys(feeds).length === 1 ? '' : 's'} running!\n`;
 
     if (feeds.length === 0) {
         return;
