@@ -65,7 +65,18 @@ function regenerateWikiMap() {
 
 regenerateWikiMap();
 
+let overflow = '';
+
 ircClient.addListener(`message${config.irc.channels.discussions}`, function(from, message) {
+    if (message.startsWith('{')) {
+        overflow = '';
+    }
+    if (!message.endsWith('}')) {
+        overflow = `${overflow}${message}`;
+        return;
+    } else {
+        message = `${overflow}${message}`;
+    }
     try {
         // Get wiki via splitting
         let post = JSON.parse(message),
