@@ -177,7 +177,7 @@ client.on("messageReactionAdd", async (MessageReaction, user) => {
     let message = MessageReaction.message,
     emoji = MessageReaction.emoji;
     
-    if (config.allowedGuildIdReactions.includes(message.guild.id) && user.id != config.botUserId) {
+    if (config.allowedGuildIdReactions.includes(message.guild.id) && user.id != config.botUserId && message.author.id === config.botUserId) {
         if (emoji.name === "❌") {
             message.delete().catch(console.error);
         }
