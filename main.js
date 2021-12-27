@@ -5,7 +5,7 @@ const config    = require('./config.json');
 const feeds     = require('./feeds.json');
 const commands  = require('./commands.js');
 
-const client = new Discord.Client();
+const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
 client.login(config.botToken);
 
 // IRC
