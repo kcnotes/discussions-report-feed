@@ -165,7 +165,7 @@ commands['list-feeds'] = function(message, params) {
     for (const feed of Object.keys(feeds)) {
         resp += feedToString(feed) + '\n';
     } 
-    message.channel.send(resp);
+    message.channel.send(resp, { split: true });
 }
 
 commands.archive = function(message, params) {
