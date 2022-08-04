@@ -258,7 +258,7 @@ commands['add-channel'] = function(message, params) {
     if (!checkParamCount(message, params, 'add-channel', 2, 2)) return;
     let cmd, feed, channel;
     [cmd, feed, channel] = params;
-    if (!/^-?\d{18}$/g.test(channel)) {
+    if (!/^-?\d{18,}$/g.test(channel)) {
         message.channel.send(`The channel ID provided is not valid.`);
         return;
     }
@@ -279,7 +279,7 @@ commands['remove-channel'] = function(message, params) {
     if (!checkParamCount(message, params, 'remove-channel', 2, 2)) return;
     let cmd, feed, channel;
     [cmd, feed, channel] = params;
-    if (!/^-?\d{18}$/g.test(channel)) {
+    if (!/^-?\d{18,}$/g.test(channel)) {
         message.channel.send(`The channel ID provided is not valid.`);
         return;
     }
@@ -303,7 +303,7 @@ commands['add-webhook'] = function(message, params) {
     if (!checkParamCount(message, params, 'add-webhook', 2, 2)) return;
     let cmd, feed, webhook;
     [cmd, feed, webhook] = params;
-    if (!/^https:\/\/discord/g.test(webhook) || !/\/\d{18}\/.{68}$/g.test(webhook)) {
+    if (!/^https:\/\/discord/g.test(webhook) || !/\/\d{18,}\/.{68}$/g.test(webhook)) {
         message.channel.send(`The webhook link provided is not valid.`);
         return;
     }
@@ -324,7 +324,7 @@ commands['remove-webhook'] = function(message, params) {
     if (!checkParamCount(message, params, 'remove-webhook', 2, 2)) return;
     let cmd, feed, webhook;
     [cmd, feed, webhook] = params;
-    if (!/^https:\/\/discord/g.test(webhook) || !/\/\d{18}\/[\w\d_]{68}$/g.test(webhook)) {
+    if (!/^https:\/\/discord/g.test(webhook) || !/\/\d{18,}\/[\w\d_]{68}$/g.test(webhook)) {
         message.channel.send(`The webhook link provided is not valid.`);
         return;
     }
