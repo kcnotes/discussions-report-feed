@@ -82,13 +82,21 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
         let post = JSON.parse(message),
         	wiki = post.url.replace('https://', '').split(/\/f\/|\/index.php|\/wiki\/Message_Wall:/g)[0],
         	type = post.type;
-        if (type === 'discussion-report' && wikis.has(wiki)) {
+        if ((type === 'discussion-report' || type === 'abuse-filter-hit') && wikis.has(wiki)) {
             for (const endpoint of Array.from(wikiMap[wiki])) {
                 // Get lines to send
                 let embed1 = formatMap[endpoint].showWikiInFeed ? `[${wiki}](https://${wiki}/f/reported)\n` : '';
-                embed1 += `[New reported post (reported by ${post.userName})](${post.url})`;
+                if (type === 'abuse-filter-hit') {
+                    embed1 += `[New abuse filter hit (hit by ${post.userName})](${post.url})`;
+                } else {
+                    embed1 += `[New reported post (reported by ${post.userName})](${post.url})`;
+                }
                 let line1 = formatMap[endpoint].showWikiInFeed ? `${wiki}: ` : '';
-                line1 += `Report by ${post.userName}: <${post.url}>`;
+                if (type === 'abuse-filter-hit') {
+                    line1 += `Abuse filter hit by ${post.userName}: <${post.url}>`;
+                } else {
+                    line1 += `Report by ${post.userName}: <${post.url}>`;
+                }
                 let line2 = post.snippet;
 
                 if (('displayEmbed' in formatMap[endpoint] && formatMap[endpoint].displayEmbed) || config.defaultConfig.displayEmbed) {
