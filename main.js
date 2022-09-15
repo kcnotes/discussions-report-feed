@@ -80,7 +80,7 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
     try {
         // Get wiki via splitting
         let post = JSON.parse(message),
-        	wiki = post.url.replace('https://', '').split(/\/f\/|\/index.php|\/wiki\/Message_Wall:/g)[0],
+        	wiki = post.url.replace('https://', '').split(/\/f\/|\/index.php|\/wiki\//g)[0],
         	type = post.type;
         if ((type === 'discussion-report' || type === 'abuse-filter-hit') && wikis.has(wiki)) {
             for (const endpoint of Array.from(wikiMap[wiki])) {
