@@ -87,7 +87,7 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
             type = post.type;
         
         if (type === 'abuse-filter-hit') {
-            globalFeedWebhookClient.send(`Abuse filter hit on <${wiki}>: ${post.userName} | <${post.url}> | ${post.snippet}`);
+            globalFeedWebhookClient.send(`AF hit | ${wiki} | ${post.userName} | <${post.url}> | ${post.snippet}`);
         }
         if ((type === 'discussion-report' || type === 'abuse-filter-hit') && wikis.has(wiki)) {
             for (const endpoint of Array.from(wikiMap[wiki])) {
