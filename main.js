@@ -4,6 +4,7 @@ const Discord   = require('discord.js');
 const config    = require('./config.json');
 const feeds     = require('./feeds.json');
 const commands  = require('./commands.js');
+const { getBooleanConfigValue } = require('./utils.js');
 
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
 client.login(config.botToken);
@@ -37,6 +38,7 @@ function generateHelpCommand(cmd) {
 }
 
 function regenerateWikiMap() {
+    const feeds = require('./feeds.json');
     wikiMap = {};
     formatMap = {};
     for (let entry of Object.entries(feeds)) {
@@ -84,21 +86,32 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
         // Get wiki via splitting
         let post = JSON.parse(message),
         	wiki = post.url.replace('https://', '').split(/\/f\/|\/index.php|\/wiki\//g)[0],
-            type = post.type;
+            type = post.type;        
         
         if (type === 'abuse-filter-hit') {
-            globalFeedWebhookClient.send(`AF hit | ${wiki} | ${post.userName} | <${post.url}> | ${post.snippet}`);
+            // globalFeedWebhookClient.send(`AF hit | ${wiki} | ${post.userName} | <${post.url}> | ${post.snippet}`);
         }
         if ((type === 'discussion-report' || type === 'abuse-filter-hit') && wikis.has(wiki)) {
             for (const endpoint of Array.from(wikiMap[wiki])) {
+                const isHitLogFeed = getBooleanConfigValue(formatMap[endpoint], config.defaultConfig, 'isHitLogFeed');
+                const showWikiInFeed = getBooleanConfigValue(formatMap[endpoint], config.defaultConfig, 'showWikiInFeed');
+                const displayEmbed = getBooleanConfigValue(formatMap[endpoint], config.defaultConfig, 'displayEmbed');
+                
+                // Early exit if it is not the right feed type
+                if (isHitLogFeed && type === 'discussion-report') {
+                    continue;
+                }
+                if (!isHitLogFeed && type === 'abuse-filter-hit') {
+                    continue;
+                }
                 // Get lines to send
-                let embed1 = formatMap[endpoint].showWikiInFeed ? `[${wiki}](https://${wiki}/f/reported)\n` : '';
+                let embed1 = showWikiInFeed ? `[${wiki}](https://${wiki}/f/reported)\n` : '';
                 if (type === 'abuse-filter-hit') {
                     embed1 += `[New abuse filter hit (hit by ${post.userName})](${post.url})`;
                 } else {
                     embed1 += `[New reported post (reported by ${post.userName})](${post.url})`;
                 }
-                let line1 = formatMap[endpoint].showWikiInFeed ? `${wiki}: ` : '';
+                let line1 = showWikiInFeed ? `${wiki}: ` : '';
                 if (type === 'abuse-filter-hit') {
                     line1 += `Abuse filter hit by ${post.userName}: <${post.url}>`;
                 } else {
@@ -106,7 +119,7 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
                 }
                 let line2 = post.snippet;
 
-                if (('displayEmbed' in formatMap[endpoint] && formatMap[endpoint].displayEmbed) || config.defaultConfig.displayEmbed) {
+                if (displayEmbed) {
                     // Display an embed
                     const embed = new Discord.MessageEmbed()
                         .setDescription(embed1 + '\n' + line2)

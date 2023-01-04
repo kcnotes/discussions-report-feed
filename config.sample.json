@@ -75,6 +75,7 @@
 	"defaultConfig": {
 		"info": "No description was provided.",
 		"showWikiInFeed": true,
+		"isHitLogFeed": false,
 		"displayCondensed": false,
 		"useWebhooks": false
 	}
