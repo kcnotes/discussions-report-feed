@@ -86,10 +86,10 @@ ircClient.addListener(`message${config.irc.channels.discussions}`, function(from
         // Get wiki via splitting
         let post = JSON.parse(message),
         	wiki = post.url.replace('https://', '').split(/\/f\/|\/index.php|\/wiki\//g)[0],
-            type = post.type;        
+            type = post.type;
         
         if (type === 'abuse-filter-hit') {
-            // globalFeedWebhookClient.send(`AF hit | ${wiki} | ${post.userName} | <${post.url}> | ${post.snippet}`);
+            globalFeedWebhookClient.send(`AF hit | ${wiki} | ${post.userName} | <${post.url}> | ${post.snippet}`);
         }
         if ((type === 'discussion-report' || type === 'abuse-filter-hit') && wikis.has(wiki)) {
             for (const endpoint of Array.from(wikiMap[wiki])) {
